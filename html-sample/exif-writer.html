@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Image Metadata in WebAssembly</title>
+    </head>
+    <body>
+        <h1>Image Metadata in WebAssembly</h1>
+        <input type="file" id="upload" accept="image/*" />
+        <button id="process">Process Image</button>
+        <img id="output" src="" alt="Processed Image" />
+        <script type="module">
+            import init, { add_metadata_to_image } from "./pkg/turbo_exif.js";
+
+            async function run() {
+                await init();
+
+                document
+                    .getElementById("process")
+                    .addEventListener("click", async () => {
+                        const fileInput = document.getElementById("upload");
+                        if (fileInput.files.length === 0) {
+                            alert("Please upload an image first.");
+                            return;
+                        }
+
+                        const file = fileInput.files[0];
+                        const fileType = file.type; // Determine the MIME type of the uploaded file
+                        const imageBytes = new Uint8Array(
+                            await file.arrayBuffer(),
+                        );
+
+                        // Define the metadata to be added
+                        const metadata = {
+                            lens_manufacturer: "Canon",
+                            lens_model: "EF 50mm f/1.4 USM",
+                            exif_version: "0230",
+                            exposure_program: 2,
+                            brightness: 0.5,
+                            contrast: 1,
+                            light_source: 1,
+                            digital_zoom: 1.0,
+                            shutter_speed: 1.0 / 2000.0,
+                            subject: "Nature",
+                            keywords: "photography, nature, outdoor",
+                            title: "Beautiful Landscape",
+                            latitude: 23.45,
+                            longitude: -75.12,
+                        };
+
+                        try {
+                            // Call the Rust WebAssembly function to add metadata
+                            const result = add_metadata_to_image(
+                                imageBytes,
+                                JSON.stringify(metadata),
+                            );
+
+                            // Create a Blob from the result and display the processed image
+                            const blob = new Blob([result], { type: fileType });
+                            document.getElementById("output").src =
+                                URL.createObjectURL(blob);
+                            document.getElementById("output").style.display =
+                                "block";
+                        } catch (e) {
+                            console.error("Error processing image:", e);
+                            alert(
+                                "Failed to add metadata. Check console for details.",
+                            );
+                        }
+                    });
+            }
+
+            run();
+        </script>
+    </body>
+</html>
