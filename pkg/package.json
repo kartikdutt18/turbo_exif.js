@@ -1,0 +1,15 @@
+{
+  "name": "turbo_exif",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "turbo_exif_bg.wasm",
+    "turbo_exif.js",
+    "turbo_exif.d.ts"
+  ],
+  "main": "turbo_exif.js",
+  "types": "turbo_exif.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
